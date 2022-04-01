@@ -13,6 +13,16 @@ const sequelize = new Sequelize({
   database: process.env.DB,
   dialect: "postgres",
   logging: false,
+  dialectOptions:
+    // third operator --> only take it when it is on web (production)
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
 });
 
 module.exports = { sequelize };
