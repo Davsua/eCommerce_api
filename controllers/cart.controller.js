@@ -13,7 +13,8 @@ exports.getUserCart = catchAsync(async (req, res, next) => {
 
   const userCart = await Carts.findOne({
     where: { status: "active", userId: currentUser.id },
-    include: [{ model: Products }],
+    //through = toma la info y la envia x sequelize a la tabla que se le indique en initModels
+    include: [{ model: Products, through: { where: { status: "active" } } }],
   });
 
   res.status(200).json({
@@ -118,6 +119,33 @@ exports.updateCartProduct = catchAsync(async (req, res, next) => {
   if (quantity > 0) {
     await productInCart.update({ quantity });
   }
+
+  res.status(200).json({
+    status: "succes",
+  });
+});
+
+exports.removeProductFromCart = catchAsync(async (req, res, next) => {
+  const { currentUser } = req;
+  const { productId } = req.params;
+
+  const userCart = await Carts.findOne({
+    where: { status: "active", userId: currentUser.id },
+  });
+
+  if (!userCart) {
+    return next(new AppError(400, "you dont have a cart yet"));
+  }
+
+  const productInCart = await productsInCart.findOne({
+    where: { status: "active", cartId: userCart.id, productId },
+  });
+
+  if (!productInCart) {
+    return next(new AppError(404, `cant update product, isnt in the cart yet`));
+  }
+
+  await productInCart.update({ status: "deleted", quantity: 0 });
 
   res.status(200).json({
     status: "succes",

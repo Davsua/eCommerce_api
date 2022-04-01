@@ -33,8 +33,7 @@ exports.createUserValidator = [
 exports.addProductToCartValidator = [
   body("productId")
     .isNumeric()
-    .notEmpty()
-    .custom((val) => val < 0)
+    .custom((val) => val > 0)
     .withMessage("must provide the productId, and it must be greater than 0"),
   body("quantity")
     .isNumeric()

@@ -5,6 +5,7 @@ const {
   deleteCart,
   getUserCart,
   updateCartProduct,
+  removeProductFromCart,
 } = require("../controllers/cart.controller");
 
 const { authenticateSesion } = require("../middlewares/auth.middleware");
@@ -28,7 +29,7 @@ router.post(
 
 router.get("/", getUserCart);
 
-router.delete("/:id", cartExist, deleteCart);
+router.delete("/:productId", removeProductFromCart);
 
 router.patch("/update-products", updateCartProduct);
 
