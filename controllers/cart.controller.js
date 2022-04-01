@@ -152,29 +152,50 @@ exports.removeProductFromCart = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllCarts = catchAsync(async (req, res, next) => {
-  const carts = await Carts.findAll();
-
-  res.status(200).json({
-    status: "succes",
-    data: carts,
-  });
-});
-
-exports.deleteCart = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
+exports.purchaseCart = catchAsync(async (req, res, next) => {
+  const { currentUser } = req;
 
   const cart = await Carts.findOne({
-    where: { id, status: "active" },
+    where: { status: "active", userId: currentUser.id },
+    include: [
+      {
+        model: Products,
+        through: { where: { status: "active" } },
+      },
+    ],
   });
 
   if (!cart) {
-    return next(new AppError(400, "cart doesnt exist"));
+    return next(new AppError(404, "This user does not have a cart yet"));
   }
 
-  await cart.update({ status: "delete" });
+  let totalPrice = 0;
 
-  res.status(200).json({
-    status: "succes",
+  const cartPromises = cart.products.map(async (product) => {
+    await product.productInCart.update({ status: "purchased" });
+
+    const productPrice = product.price * product.productInCart.quantity;
+
+    totalPrice += productPrice;
+
+    const newQty = product.quantity - product.productInCart.quantity;
+
+    return await product.update({ quantity: newQty });
+  });
+
+  await Promise.all(cartPromises);
+
+  await cart.update({ status: "purchased" });
+
+  const newOrder = await Order.create({
+    userId: currentUser.id,
+    cartId: cart.id,
+    issuedAt: Date.now().toLocaleString(),
+    totalPrice,
+  });
+
+  res.status(201).json({
+    status: "success",
+    data: { newOrder },
   });
 });

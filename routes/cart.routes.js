@@ -1,8 +1,6 @@
 const express = require("express");
 const {
   addProductToCart,
-  getAllCarts,
-  deleteCart,
   getUserCart,
   updateCartProduct,
   removeProductFromCart,
