@@ -9,6 +9,7 @@ const {
   getUserById,
   getUserproducts,
   getOrdersByUserById,
+  getOrdersByUser,
 } = require("../controllers/users.controller");
 const { authenticateSesion } = require("../middlewares/auth.middleware");
 const {
