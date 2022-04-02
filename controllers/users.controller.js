@@ -10,6 +10,7 @@ const { filterObj } = require("../utils/filterObjects");
 const { AppError } = require("../utils/appError");
 const { Products } = require("../models/products.model");
 const { Order } = require("../models/orders.model");
+const { Carts } = require("../models/carts.model");
 
 dotenv.config({ path: "./config.env" });
 
@@ -48,12 +49,12 @@ exports.getUserproducts = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllOrdersByUser = catchAsync(async (req, res, next) => {
-  const { user } = req;
+exports.getOrdersByUser = catchAsync(async (req, res, next) => {
+  const { currentUser } = req;
 
-  user = await User.findOne({
-    include: [{ model: Order }],
-  });
+  const orders = (user = await Order.findAll({
+    where: { userId: currentUser.id },
+  }));
 
   res.status(200).json({
     status: "succes",
@@ -61,15 +62,21 @@ exports.getAllOrdersByUser = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllOrdersByUserById = catchAsync(async (req, res, next) => {
-  const { user } = req;
+exports.getOrdersByUserById = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
 
-  const orderId = await Order.findOne({
+  const order = await Order.findOne({
     where: { id },
+    include: [{ model: Carts, include: { model: Products } }],
   });
 
-  user = await User.findOne({
-    include: [{ orderId }],
+  if (!order) {
+    return next(new AppError(400, "order doesnt exist"));
+  }
+
+  res.status(200).json({
+    status: "succes",
+    data: order,
   });
 });
 

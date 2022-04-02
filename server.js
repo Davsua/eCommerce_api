@@ -15,7 +15,7 @@ sequelize
   .then(() => console.log("datababase sync"))
   .catch((err) => console.log(err));
 
-const port = process.env.PORT;
+const port = process.env.PORT || 4000;
 
 app.listen(port, () => {
   console.log(`connecting to express ... server port ${port}`);

@@ -4,12 +4,11 @@ const {
   getAllUsers,
   createNewUser,
   loginUser,
-  getAllOrdersByUser,
-  getAllOrdersByUserById,
   updateUser,
   deleteUser,
   getUserById,
   getUserproducts,
+  getOrdersByUserById,
 } = require("../controllers/users.controller");
 const { authenticateSesion } = require("../middlewares/auth.middleware");
 const {
@@ -33,9 +32,9 @@ router.get("/", getAllUsers);
 
 router.get("/me", getUserproducts);
 
-router.get("/orders", getAllOrdersByUser);
+router.get("/orders", getOrdersByUser);
 
-router.get("/orders/:id", getAllOrdersByUserById);
+router.get("/orders/:id", getOrdersByUserById);
 
 //siempre deben estar al final ya que :id es un parametro dinamico
 //node puede asimila una ruta como este parametro dinamico por ende puede
